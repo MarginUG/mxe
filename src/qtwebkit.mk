@@ -13,6 +13,7 @@ $(PKG)_DEPS     := cc libxml2 libxslt libwebp qtbase qtmultimedia qtquickcontrol
                    qtsensors qtwebchannel sqlite
 
 define $(PKG)_BUILD_SHARED
+    mkdir -p '$(BUILD_DIR)/release' && \
     cd '$(BUILD_DIR)/release' && $(TARGET)-cmake '$(SOURCE_DIR)' \
         -DCMAKE_INSTALL_PREFIX=$(PREFIX)/$(TARGET)/qt5 \
         -DCMAKE_CXX_FLAGS='-fpermissive' \
@@ -30,6 +31,7 @@ define $(PKG)_BUILD_SHARED
     $(MAKE) -C '$(BUILD_DIR)/release' -j 1 install
 
 
+    mkdir -p '$(BUILD_DIR)/debug' && \
     cd '$(BUILD_DIR)/debug' && $(TARGET)-cmake '$(SOURCE_DIR)' \
         -DCMAKE_INSTALL_PREFIX=$(PREFIX)/$(TARGET)/qt5 \
         -DCMAKE_CXX_FLAGS='-fpermissive' \
