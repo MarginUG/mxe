@@ -13,9 +13,10 @@ $(PKG)_DEPS     := cc libxml2 libxslt libwebp qtbase qtmultimedia qtquickcontrol
                    qtsensors qtwebchannel sqlite
 
 define $(PKG)_BUILD_SHARED
-    cd '$(BUILD_DIR)' && $(TARGET)-cmake '$(SOURCE_DIR)' \
+    cd '$(BUILD_DIR)/release' && $(TARGET)-cmake '$(SOURCE_DIR)' \
         -DCMAKE_INSTALL_PREFIX=$(PREFIX)/$(TARGET)/qt5 \
         -DCMAKE_CXX_FLAGS='-fpermissive' \
+	-DCMAKE_BUILD_TYPE='Release' \
         -DEGPF_DEPS='Qt5Core Qt5Gui Qt5Multimedia Qt5Widgets Qt5WebKit' \
         -DPORT=Qt \
         -DENABLE_GEOLOCATION=OFF \
@@ -25,20 +26,37 @@ define $(PKG)_BUILD_SHARED
         -DUSE_GSTREAMER=OFF \
         -DUSE_MEDIA_FOUNDATION=OFF \
         -DUSE_QT_MULTIMEDIA=ON
-    $(MAKE) -C '$(BUILD_DIR)' -j '$(JOBS)' VERBOSE=1 || $(MAKE) -C '$(BUILD_DIR)' -j '$(JOBS)' VERBOSE=1
-    $(MAKE) -C '$(BUILD_DIR)' -j 1 install
+    $(MAKE) -C '$(BUILD_DIR)/release' -j '$(JOBS)' VERBOSE=1 || $(MAKE) -C '$(BUILD_DIR)/release' -j '$(JOBS)' VERBOSE=1
+    $(MAKE) -C '$(BUILD_DIR)/release' -j 1 install
+
+
+    cd '$(BUILD_DIR)/debug' && $(TARGET)-cmake '$(SOURCE_DIR)' \
+        -DCMAKE_INSTALL_PREFIX=$(PREFIX)/$(TARGET)/qt5 \
+        -DCMAKE_CXX_FLAGS='-fpermissive' \
+	-DCMAKE_BUILD_TYPE='Debug' \
+        -DEGPF_DEPS='Qt5Core Qt5Gui Qt5Multimedia Qt5Widgets Qt5WebKit' \
+        -DPORT=Qt \
+        -DENABLE_GEOLOCATION=OFF \
+        -DENABLE_MEDIA_SOURCE=ON \
+        -DENABLE_VIDEO=ON \
+        -DENABLE_WEB_AUDIO=ON \
+        -DUSE_GSTREAMER=OFF \
+        -DUSE_MEDIA_FOUNDATION=OFF \
+        -DUSE_QT_MULTIMEDIA=ON
+    $(MAKE) -C '$(BUILD_DIR)/debug' -j '$(JOBS)' VERBOSE=1 || $(MAKE) -C '$(BUILD_DIR)/debug' -j '$(JOBS)' VERBOSE=1
+    $(MAKE) -C '$(BUILD_DIR)/debug' -j 1 install
 
     # build test manually
     # add $(BUILD_TYPE_SUFFIX) for debug builds - see qtbase.mk
-    $(TARGET)-g++ \
-        -W -Wall -std=c++11 \
-        '$(TEST_FILE)' -o '$(PREFIX)/$(TARGET)/bin/test-$(PKG).exe' \
-        `$(TARGET)-pkg-config Qt5WebKitWidgets --cflags --libs`
+#   $(TARGET)-g++ \
+#        -W -Wall -std=c++11 \
+#        '$(TEST_FILE)' -o '$(PREFIX)/$(TARGET)/bin/test-$(PKG).exe' \
+#        `$(TARGET)-pkg-config Qt5WebKitWidgets --cflags --libs`
 
     # batch file to run test programs
-    (printf 'set PATH=..\\lib;..\\qt5\\bin;..\\qt5\\lib;%%PATH%%\r\n'; \
-     printf 'set QT_QPA_PLATFORM_PLUGIN_PATH=..\\qt5\\plugins\r\n'; \
-     printf 'test-$(PKG).exe\r\n'; \
-     printf 'cmd\r\n';) \
-     > '$(PREFIX)/$(TARGET)/bin/test-$(PKG).bat'
+#    (printf 'set PATH=..\\lib;..\\qt5\\bin;..\\qt5\\lib;%%PATH%%\r\n'; \
+#     printf 'set QT_QPA_PLATFORM_PLUGIN_PATH=..\\qt5\\plugins\r\n'; \
+#     printf 'test-$(PKG).exe\r\n'; \
+#     printf 'cmd\r\n';) \
+#     > '$(PREFIX)/$(TARGET)/bin/test-$(PKG).bat'
 endef
